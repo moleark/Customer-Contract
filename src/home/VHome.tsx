@@ -75,11 +75,10 @@ export class VHome extends VPage<CHome> {
 
     private page = observer(() => {
         this.getTabs();
-        let { onAddOrderPage } = this.controller.cApp.cOrder;
+        let { onAdd } = this.controller;
         let right = (
             <div className="d-flex small">
-
-                <div onClick={onAddOrderPage}>
+                <div onClick={onAdd}>
                     <span className="mx-sm-2 iconfont icon-jiahao1 cursor-pointer mr-2" style={{ fontSize: "1.7rem", color: "white" }}></span>
                 </div>
             </div>

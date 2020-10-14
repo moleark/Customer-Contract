@@ -2,14 +2,16 @@ import * as React from 'react';
 import { RowContext, nav, User, BoxId } from 'tonva';
 import { CUqBase } from '../CBase';
 import { CartPackRow, CartItem2 } from './Cart';
+import { observer } from 'mobx-react';
 import { VCartLabel } from './VCartLabel';
+import { VCart } from './VCart';
 
 export class CCart extends CUqBase {
 
     private selectedCartItems: CartItem2[];
 
     protected async internalStart(param: any) {
-
+        this.openVPage(VCart);
     }
 
 
@@ -34,6 +36,43 @@ export class CCart extends CUqBase {
         if (!cart.isDeleted(product.id)) {
             cProduct.showProductDetail(product);
         }
+    }
+    checkOut = async () => {
+        let { cart } = this.cApp;
+        this.selectedCartItems = cart.getSelectedItems();
+        if (this.selectedCartItems === undefined) return;
+        // if (!this.isLogined) {
+        //     nav.showLogin(this.loginCallback, true);
+        // } else {
+        await this.doFirstOrderChecking();
+        // }
+    }
+    private doFirstOrderChecking = async () => {
+        let { cMe, currentUser } = this.cApp;
+        // if (!currentUser.allowOrdering) {
+        //     cMe.toPersonalAccountInfo(this.doCheckOut);
+        // } else {
+        //     await this.doCheckOut();
+        // }
+        await this.doCheckOut();
+    }
+    // private loginCallback = async (user: User): Promise<void> => {
+    //     let { cApp } = this;
+    //     await cApp.currentUser.setUser(user);
+    //     await cApp.loginCallBack(user);
+    //     this.closePage(1);
+    //     await this.doFirstOrderChecking();
+    // };
+
+    /**
+   * 导航到CheckOut界面
+   */
+    doCheckOut = async () => {
+
+        let { cOrder } = this.cApp;
+        let { selectedCartItems } = this;
+        if (selectedCartItems === undefined) return;
+        await cOrder.createOrderFromCart(selectedCartItems);
     }
     /**
      * 商品从购物车永久性删除

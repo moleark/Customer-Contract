@@ -6,16 +6,14 @@ import { VProductDelivery } from './VProductDelivery';
 import { VCartProuductView } from './VProductView';
 import { VProductList } from './VProductList';
 import { LoaderProductChemicalWithPrices } from './itemLoader';
-import { VProductSelect } from './VProductSelect';
 
 export class CProduct extends CUqBase {
     @observable pageProductList: QueryPager<any>;
 
     @observable futureDeliveryTimeDescriptionContainer: { [cacheId: string]: string } = {};
     @observable chemicalInfoContainer: { [productId: number]: any } = {};
-    protected async internalStart(param?: any) {
-        this.searchByKey(param);
-        this.openVPage(VProductList, param);
+    protected async internalStart() {
+        // this.openVPage(VProductList);
     }
 
     renderDeliveryTime = (pack: BoxId) => {
@@ -50,11 +48,9 @@ export class CProduct extends CUqBase {
         this.openVPage(VProductList);
     }
     searchByKey = async (key: string) => {
-        this.closePage();
         let { currentSalesRegion } = this.cApp;
         this.pageProductList = new QueryPager(this.uqs.product.SearchProduct, 10, 10);
         this.pageProductList.first({ keyWord: key, salesRegion: currentSalesRegion.id });
-        this.openVPage(VProductSelect)
     };
 
     showProductDetail = async (productId: BoxId | any) => {

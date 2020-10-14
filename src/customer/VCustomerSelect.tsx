@@ -1,34 +1,31 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import { CCustomer } from './CCustomer';
+import { CCustomerSelect } from './CCustomerSelect';
 import { VPage, Page, LMR, List, SearchBox, FA, tv } from 'tonva';
 
-export class VCustomerSelect extends VPage<CCustomer> {
+export class VCustomerSelect extends VPage<CCustomerSelect> {
     private type: any;
-    async open(customer: any) {
-        this.openPage(this.page, customer);
+    async open() {
+        this.openPage(this.page);
     }
 
     private renderCustomer = (customer: any, index: number) => {
-        let { name, unit, validity, webuser } = customer;
-        let { showCustomerOrderDetail } = this.controller
+        let { name, unit, validity, webuser, id } = customer;
+        let { cApp } = this.controller
 
-        let nameShow = <div className="cursor-pointer font-weight-bold w-100">{name}</div>;
-        let unitShow = <div className=" cursor-pointer text-muted"><small> {tv(unit, v => v.name)}</small></div>;
+        let nameShow = <div className="cursor-pointer font-weight-bold w-100">{customer.name}</div>;
+        let unitShow = <div className=" cursor-pointer text-muted"><small> {tv(unit, s => s.name)}</small></div>;
         let order = <div className=" cursor-pointer text-primary">选择</div>
-        let webuserid = webuser ? webuser.id : 47;
 
-        return <LMR className="px-2 py-1" left={<FA name='user' className=' my-2 mr-3 text-info fa-2x' />}
-        //  onClick={() => showCustomerOrderDetail(customer)}
-        >
+        return <LMR className="px-2 py-1" left={<FA name='user' className=' my-2 mr-3 text-info fa-2x' />}>
             <LMR className="px-1 pt-2" left={nameShow} ></LMR>
             <LMR className="px-1" left={unitShow} right={order}></LMR>
         </LMR>
     }
 
-    private page = observer((customer: any) => {
+    private page = observer(() => {
 
-        let { pageCustomer, searchByKey, showSelectOrganization, cApp } = this.controller;
+        let { pageCustomer, searchByKey, showSelectOrganization, cApp, onCustomerSelect } = this.controller;
 
         let search = <div className="w-100 d-flex">
             <span className="pt-1 text-white " style={{ width: '9rem' }}>选择客户</span>
@@ -43,9 +40,9 @@ export class VCustomerSelect extends VPage<CCustomer> {
             {branch("单位", "icon-ren", () => cApp.cCustomerUnit.start(3))}
             {
                 (pageCustomer && pageCustomer.items && (pageCustomer.items.length > 0)) ?
-                    <List before={''} none={none} items={pageCustomer} item={{ render: this.renderCustomer }} />
+                    <List before={''} none={none} items={pageCustomer} item={{ render: this.renderCustomer, onClick: onCustomerSelect }} />
                     : < div className="py-2 text-warning text-center bg-white mt-2">暂无客户<span className="text-primary"
-                        onClick={() => showSelectOrganization(1)}>创建客户！</span></div>
+                        onClick={() => showSelectOrganization(1)}  >创建客户！</span></div>
             }
         </Page>
     })
@@ -60,6 +57,6 @@ function branch(name: string, icon: string, action: any): JSX.Element {
         left={<div className=""><i className={vicon} style={{ fontSize: "2rem", color: "#1296db" }}></i></div>}
         right={<i className="pt-2 px-2 iconfont icon-jiantouyou"></i>}
         onClick={action}>
-        <div className="mx-3 pt-2 font-weight-bold">{name}</div>
+        <div className="mx-3 pt-2 font-weight-bold"  >{name}</div>
     </LMR>;
 }

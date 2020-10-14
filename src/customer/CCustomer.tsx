@@ -3,17 +3,18 @@ import { observable } from "mobx";
 import { observer } from "mobx-react";
 import { Context, QueryPager } from "tonva";
 import { CUqBase } from "../CBase";
-import { VCustomer } from "./VCustomer"
-import { VCustomerSearch } from "./VCustomerSearch";
+import { VCustomer } from "./VCustomer";
 import { VCustomerSearchByUnit } from "./VCustomerSearchByUnit";
 import { VCreateCustomer } from "./VCreateCustomer";
 import { VCreateCustomerFinish } from "./VCreateCustomerFinish";
-import { VCustomerSelect } from "./VCustomerSelect";
 import { VCustomerOrderDetail } from "./VCustomerOrderDetail";
+import { CCustomerSelect } from './CCustomerSelect';
+import { CCustomerAddress } from './CCustomerAddress';
 
 /* eslint-disable */
 
 export class CCustomer extends CUqBase {
+    @observable goalCustomerInfo: any = {};        /* 客户信息 */
     @observable pageCustomer: QueryPager<any>;
     @observable pageCustomerSearch: QueryPager<any>;
     @observable pageCustomerSearchByUnit: QueryPager<any>;
@@ -37,10 +38,22 @@ export class CCustomer extends CUqBase {
     /**
        * 显示客户选择界面
        */
-    showCustomerSelect = async () => {
-        this.searchByKey("");
-        this.openVPage(VCustomerSelect);
+    /**
+  * 客户选择
+  */
+    onShowCustomerSelect = async () => {
+        let cCustomerSelect = this.newC(CCustomerSelect);
+        let selectmycustomer = await cCustomerSelect.call<any>(true);
+        this.goalCustomerInfo = selectmycustomer;
     }
+    /**客户地址 */
+    onShowCustomerAddress = async () => {
+        let cCustomerAddress = this.newC(CCustomerAddress);
+        let customer = this.goalCustomerInfo
+        let customerAddress = await cCustomerAddress.call<any>(customer, true);
+        this.goalCustomerInfo = customerAddress;
+    }
+
     //选择客户--给调用页面返回客户id
     returnCustomer = async (customer: any): Promise<any> => {
         this.returnCall(customer);
@@ -95,7 +108,7 @@ export class CCustomer extends CUqBase {
         // let customermap = await CustomerMyCustomerMap.obj({ sales: user, mycustomer: myCustomer });
         // if (customermap) {
         //     let { webuser, customer } = customermap;
-        // mycustomer.webuser = webuser;
+        //     mycustomer.webuser = webuser;
         //     await this.setIsBinded(customer);
         //     if (webuser) {
         //         let vipCardForWebUser = await this.getVIPCard(webuser);
@@ -163,6 +176,4 @@ export class CCustomer extends CUqBase {
         let { code } = ret;
         this.openVPage(VCreateCustomerFinish, code);
     };
-
-
 }

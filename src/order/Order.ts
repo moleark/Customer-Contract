@@ -4,28 +4,11 @@ import { CartPackRow } from 'cart/Cart';
 
 export class Order {
 
-    webUser: any;
-    organization: BoxId;
-    customer: any;
-
-    @observable shippingContact: BoxId;
-    @observable invoiceContact: BoxId;
-    @observable invoiceType: BoxId;
-    @observable invoiceInfo: BoxId;
     @observable orderItems: OrderItem[] = [];
 
     @observable freightFee: number;
     @observable freightFeeRemitted: number;
 
-    /*
-    @computed get amount() {
-        return parseFloat((this.orderItems.reduce((pv, cv) => (pv + cv.subAmount), 0) +
-            (this.freightFee ? this.freightFee : 0) +
-            (this.freightFeeRemitted ? this.freightFeeRemitted : 0) +
-            (this.couponOffsetAmount ? this.couponOffsetAmount : 0) +
-            (this.couponRemitted ? this.couponRemitted : 0)).toFixed(2));
-    };
-    */
     /**
      * 总金额
      */
@@ -34,9 +17,6 @@ export class Order {
             (this.freightFee ? this.freightFee : 0) +
             (this.freightFeeRemitted ? this.freightFeeRemitted : 0)).toFixed(2));
     };
-    // @computed get productAmount() {
-    //     return parseFloat(this.orderItems.reduce((pv, cv) => pv + cv.subAmount, 0).toFixed(2));
-    // };
     /**
      * 商品总额(未应用券的价格) -----> 已修 应用目录价计算(总额恒定)
      */
@@ -63,13 +43,6 @@ export class Order {
             })
         });
         return {
-            webUser: this.webUser,
-            organization: this.organization,
-            customer: this.customer,
-            shippingContact: this.shippingContact,
-            invoiceContact: this.invoiceContact,
-            invoiceType: this.invoiceType,
-            invoiceInfo: this.invoiceInfo,
             amount: this.amount,
             currency: this.currency,
             freightFee: this.freightFee,

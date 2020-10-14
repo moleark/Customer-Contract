@@ -70,10 +70,10 @@ export class Cart {
 
     async init(): Promise<void> {
         let { isLogined, uqs, currentSalesRegion } = this.cApp;
-        if (isLogined)
-            this.cartStore = new CartRemote(this.cApp);
-        else
-            this.cartStore = new CartLocal(this.cApp);
+        // if (isLogined)
+        //     this.cartStore = new CartRemote(this.cApp);
+        // else
+        this.cartStore = new CartLocal(this.cApp);
         let cartData = await this.cartStore.load();
 
         // 初始化购物车中产品的目录价
@@ -107,30 +107,6 @@ export class Cart {
             }
         }
     }
-
-    /*
-    private mergeToRemote(localItems: any[]) {
-        let originLength = localItems.length;
-        let nowLength = this.items.length;
-        if (originLength > 0) {
-            if (nowLength > 0) {
-                // 合并，谁覆盖谁？
-                for (let i = 0; i < originLength; i++) {
-                    let { product: tempProduct, pack: tempPack } = localItems[i];
-                    let cartItemExits = this.items.find(v => v.product === tempProduct && v.pack === tempPack);
-                    if (cartItemExits) {
-                        // 如果本地购物车中的产品已经过期，则要删除
-                    } else {
-                        this.items.push(localItems[i]);
-                    }
-                }
-            } else {
-                this.items.push(...localItems);
-            }
-            // 保存到远程
-        }
-    }
-    */
 
     getQuantity(productId: number, packId: number): number {
         let cp = this.cartItems.find(v => v.$isDeleted !== true && Tuid.equ(v.product, productId));
@@ -228,51 +204,6 @@ export class Cart {
             this.cartStore.removeFromCart(rows);
         }
     }
-
-    /*
-    setDeletedMark(productId: number, packId: number) {
-        let cp = this.items.find(v => v.$isDeleted !== true && v.product === productId && v.pack === packId);
-        if (cp !== undefined)
-            cp.$isDeleted = true;
-    }
-
-    async removeDeletedItem() {
-        let rows: { product: number, packItem: CartPackRow }[] = [];
-        for (let cp of this.items) {
-            let { quantity, $isDeleted } = cp;
-            if ($isDeleted === true || quantity === 0) {
-                // TODO:
-            }
-        }
-        if (rows.length === 0) return;
-        await this.cartStore.removeFromCart(rows);
-
-        // 下面是从本地数据结构中删除
-        for (let cp of this.items) {
-            let { packs } = cp;
-            let packIndexes: number[] = [];
-            let len = packs.length;
-            for (let i = 0; i < len; i++) {
-                if (packs[i].quantity === 0) packIndexes.push(i);
-            }
-            for (let i = packIndexes.length - 1; i >= 0; i--) packs.splice(packIndexes[i], 1);
-        }
-
-        let itemIndexes: number[] = [];
-        let len = this.items.length;
-        for (let i = 0; i < len; i++) {
-            let { $isDeleted, packs } = this.items[i];
-            if ($isDeleted === true || packs.length === 0) itemIndexes.push(i);
-        }
-        for (let i = itemIndexes.length - 1; i >= 0; i--) this.items.splice(itemIndexes[i], 1);
-    }
-
-    async clear() {
-        this.items.forEach(v => v.$isDeleted = true);
-        await this.removeDeletedItem();
-    }
-    */
-
 }
 
 abstract class CartStore {
@@ -285,53 +216,6 @@ abstract class CartStore {
     abstract async load(): Promise<CartItem2[]>;
     abstract async storeCart(product: BoxId, pack: BoxId, quantity: number, price: number, currency: any): Promise<void>;
     abstract async removeFromCart(rows: [{ productId: number, packId: number }]): Promise<void>;
-}
-
-class CartRemote extends CartStore {
-    //private getCartQuery: Query;
-    //private setCartAction: Action;
-    //private removeFromCartAction: Action;
-
-    get isLocal(): boolean { return false }
-
-    /*
-    constructor(cApp: CApp) {
-        super(cApp);
-
-        let { cUqOrder } = this.cApp;
-        this.getCartQuery = cUqOrder.query('getcart')
-        this.setCartAction = cUqOrder.action('setcart');
-        this.removeFromCartAction = cUqOrder.action('removefromcart');
-    }
-    */
-
-    async load(): Promise<CartItem2[]> {
-        let ret = await this.cApp.uqs.order.GetCart.page(undefined, 0, 100);
-        return ret && ret.$page as any;
-    }
-
-    /**
-     *
-     * @param product
-     * @param pack
-     * @param quantity
-     * @param price
-     * @param currency
-     */
-    async storeCart(product: BoxId, pack: BoxId, quantity: number, price: number, currency: any) {
-        await this.cApp.uqs.order.SetCart.submit({
-            product: product.id,
-            pack: pack.id,
-            price: price,
-            currency: currency,
-            quantity: quantity
-        });
-    }
-
-    async removeFromCart(rows: [{ productId: number, packId: number }]) {
-        let param = rows.map(e => { return { product: e.productId, pack: e.packId } });
-        await this.cApp.uqs.order.RemoveFromCart.submit({ rows: param });
-    }
 }
 
 const LOCALCARTNAME: string = "cart";

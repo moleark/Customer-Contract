@@ -10,6 +10,7 @@ import { ProductPackRow } from './Product';
 import { ViewMainSubs, MainProductChemical } from 'mainSubs';
 import { ProductImage } from 'tools/productImage';
 import { productPropItem, renderBrand } from './VProductView';
+import { observer } from 'mobx-react';
 
 const schema: ItemSchema[] = [
     { name: 'pack', type: 'object' } as ObjectSchema,
@@ -83,7 +84,7 @@ export class VProduct extends VPage<CProduct> {
         return <div className="px-2">
             <div className="row">
                 <div className="col-6">
-                    <div><b>{tv(pack.obj, v => v.radioy)}{tv(pack.obj, v => v.unit)}</b></div>
+                    <div><b>{tv(pack)}</b></div>
                     <div>{this.controller.renderDeliveryTime(pack)}</div>
                 </div>
                 <div className="col-6">
@@ -129,16 +130,18 @@ export class VProduct extends VPage<CProduct> {
         </>;
     }
 
-    private page = (product: any) => {
+    private page = observer((product: any) => {
 
         let { cApp } = this.controller;
-        let header = '详情'
-
-        let viewProduct = new ViewMainSubs<MainProductChemical, ProductPackRow>(this.renderProduct, this.renderPack);
-        viewProduct.model = product;
+        let header = '详情';
         let cartLabel = cApp.cCart.renderCartLabel();
-        return <Page header={header} right={cartLabel}>
-            <div className="px-2 py-2 bg-white mb-3">{viewProduct.render()}</div>
-        </Page>
-    }
+        if (true) {
+            let viewProduct = new ViewMainSubs<MainProductChemical, ProductPackRow>(this.renderProduct, this.renderPack);
+            viewProduct.model = product;
+
+            return <Page header={header} right={cartLabel}>
+                <div className="px-2 py-2 bg-white mb-3">{viewProduct.render()}</div>
+            </Page>
+        }
+    })
 }

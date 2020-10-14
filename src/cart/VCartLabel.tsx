@@ -23,11 +23,11 @@ export class VCartLabel extends View<CCart> {
         if (count > 0) {
             onClick = this.showCart;
             pointer = 'cursor-pointer';
-            if (count < 100) badge = <u style={{ border: 'none', position: 'absolute' }}>{count}</u>;
+            if (count < 100) badge = <u>{count}</u>;
             else badge = <u>99+</u>;
         }
         return <div className={classNames('jk-cart ml-1 mr-2', pointer)} onClick={onClick}>
-            <div style={{ position: 'relative' }}>
+            <div>
                 <span className="fa-stack">
                     <i className="fa fa-square fa-stack-2x text-white"></i>
                     <i className="fa fa-shopping-cart fa-stack-1x text-info"></i>
