@@ -44,25 +44,9 @@ export class CCart extends CUqBase {
         // if (!this.isLogined) {
         //     nav.showLogin(this.loginCallback, true);
         // } else {
-        await this.doFirstOrderChecking();
-        // }
-    }
-    private doFirstOrderChecking = async () => {
-        let { cMe, currentUser } = this.cApp;
-        // if (!currentUser.allowOrdering) {
-        //     cMe.toPersonalAccountInfo(this.doCheckOut);
-        // } else {
-        //     await this.doCheckOut();
-        // }
         await this.doCheckOut();
+        // }
     }
-    // private loginCallback = async (user: User): Promise<void> => {
-    //     let { cApp } = this;
-    //     await cApp.currentUser.setUser(user);
-    //     await cApp.loginCallBack(user);
-    //     this.closePage(1);
-    //     await this.doFirstOrderChecking();
-    // };
 
     /**
    * 导航到CheckOut界面

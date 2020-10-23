@@ -34,7 +34,7 @@ export class VCustomer extends VPage<CCustomer> {
 
         let { cApp, pageCustomer } = this.controller;
 
-        let search = <div className="w-100 d-flex">
+        let search = <div className="w-100 d-flex py-2">
             <SearchBox className="w-100 mx-3"
                 size='sm'
                 onSearch={(key: string) => this.controller.searchByKey(key)}
@@ -43,7 +43,8 @@ export class VCustomer extends VPage<CCustomer> {
 
         let none = <div className="my-3 mx-2 text-warning">【无】</div>;
 
-        return <Page header={search}  >
+        return <div >
+            {search}
             <LMR className="bg-white px-2 py-1 "
                 left={<i className='iconfont icon-ren text-primary' style={{ fontSize: "2rem" }}></i>}
                 right={<i className="pt-2 px-2 iconfont icon-jiantouyou"></i>}
@@ -55,6 +56,6 @@ export class VCustomer extends VPage<CCustomer> {
                     <List before={''} none={none} items={pageCustomer} item={{ render: this.renderCustomer }} />
                     : < div className="py-2 text-warning text-center bg-white mt-2">暂无客户</div>
             }
-        </Page >
+        </div >
     })
 }

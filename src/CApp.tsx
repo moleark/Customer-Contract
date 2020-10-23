@@ -8,7 +8,7 @@ import { CHome } from 'home/CHome';
 import { CCustomer } from "customer/CCustomer";
 import { CCustomerUnit } from "./customerunit/CCustomerUnit";
 import { COrder } from 'order/COrder';
-// import { CCoupon } from 'coupon/CCoupon';
+import { CCoupon } from 'coupon/CCoupon';
 import { CProduct } from 'product/CProduct';
 import { GLOABLE } from 'configuration';
 import { res } from 'res';
@@ -28,7 +28,7 @@ export class CApp extends CUqApp {
     cCustomer: CCustomer;
     cCustomerUnit: CCustomerUnit;
     cOrder: COrder;
-    // cCoupon: CCoupon;
+    cCoupon: CCoupon;
     cProduct: CProduct;
     cCart: CCart;
 
@@ -53,14 +53,14 @@ export class CApp extends CUqApp {
         this.setUser();
         this.setRes(res);
         this.cart = new Cart(this);
-        await this.cart.init();
+        // await this.cart.init();
 
         this.cHome = this.newC(CHome);
         this.cMe = this.newC(CMe);
         this.cCustomer = this.newC(CCustomer);
         this.cCustomerUnit = this.newC(CCustomerUnit);
         this.cOrder = this.newC(COrder);
-        // this.cCoupon = this.newC(CCoupon);
+        this.cCoupon = this.newC(CCoupon);
         this.cProduct = this.newC(CProduct);
         this.cCart = this.newC(CCart);
 

@@ -170,8 +170,8 @@ export class Cart {
             cartItemExists.$isDeleted = false;
             cartItemExists.createdate = Date.now();
         }
-
-        await this.cartStore.storeCart(product, pack, quantity, price, currency);
+        // if (this.cartStore)
+        //     await this.cartStore.storeCart(product, pack, quantity, price, currency);
     }
     removeStrike = async (data: any) => {
         console.log(data);
@@ -184,7 +184,7 @@ export class Cart {
 
     /**
      *
-     * @param rows
+     * @param rows 
      */
     async removeFromCart(rows: [{ productId: number, packId: number }]) {
         if (rows && rows.length > 0) {
@@ -201,7 +201,8 @@ export class Cart {
                     }
                 }
             })
-            this.cartStore.removeFromCart(rows);
+            if (this.cartStore)
+                this.cartStore.removeFromCart(rows);
         }
     }
 }

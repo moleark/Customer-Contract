@@ -10,11 +10,13 @@ import { VCreateCustomerFinish } from "./VCreateCustomerFinish";
 import { VCustomerOrderDetail } from "./VCustomerOrderDetail";
 import { CCustomerSelect } from './CCustomerSelect';
 import { CCustomerAddress } from './CCustomerAddress';
+import { CInvoiceInfo } from './CInvoiceInfo';
 
 /* eslint-disable */
 
 export class CCustomer extends CUqBase {
-    @observable goalCustomerInfo: any = {};        /* 客户信息 */
+    @observable CustomerInfo: any = {};        /* 客户信息 */
+    @observable CustomerAddress: any = {};        /* 客户地址 */
     @observable pageCustomer: QueryPager<any>;
     @observable pageCustomerSearch: QueryPager<any>;
     @observable pageCustomerSearchByUnit: QueryPager<any>;
@@ -36,40 +38,36 @@ export class CCustomer extends CUqBase {
     };
 
     /**
-       * 显示客户选择界面
-       */
-    /**
-  * 客户选择
-  */
+     * 客户选择
+    */
     onShowCustomerSelect = async () => {
         let cCustomerSelect = this.newC(CCustomerSelect);
         let selectmycustomer = await cCustomerSelect.call<any>(true);
-        this.goalCustomerInfo = selectmycustomer;
+        this.CustomerInfo = selectmycustomer;
     }
     /**客户地址 */
     onShowCustomerAddress = async () => {
         let cCustomerAddress = this.newC(CCustomerAddress);
-        let customer = this.goalCustomerInfo
-        let customerAddress = await cCustomerAddress.call<any>(customer, true);
-        this.goalCustomerInfo = customerAddress;
+        let customeraddress = await cCustomerAddress.call<any>(this.CustomerInfo);
+        this.CustomerAddress = customeraddress;
     }
-
-    //选择客户--给调用页面返回客户id
-    returnCustomer = async (customer: any): Promise<any> => {
-        this.returnCall(customer);
-    };
-
     /**
-       * 显示客户搜索界面
-       */
-    // showCustomerSearch = async (val: any): Promise<any> => {
-    //     if (val == null) {
-    //         this.pageCustomerSearch = null;
-    //     } else {
-    //         this.searchCustomerByKey(val);
-    //     }
-    //     this.openVPage(VCustomerSearch);
-    // };
+      * 打开发票信息编辑界面
+      */
+    onInvoiceInfoEdit = async () => {
+        let cInvoiceInfo = this.newC(CInvoiceInfo);
+        let newInvoice = await cInvoiceInfo.call<any>(this.CustomerInfo);
+        this.CustomerInfo.invoiceType = newInvoice.invoiceType;
+        this.CustomerInfo.invoiceInfo = newInvoice.invoiceInfo;
+    }
+    /**打开优惠卡券界面 */
+    onCouponEdit = async () => {
+        let { cCoupon } = this.cApp;
+        let coupon = await cCoupon.call<any>();
+        if (coupon) {
+            await this.cApp.cOrder.applyCoupon(coupon);
+        }
+    }
 
     searchCustomerByKey = async (key: string) => {
         this.pageCustomerSearch = new QueryPager(this.uqs.salesTask.searchMyCustomer, 15, 30);

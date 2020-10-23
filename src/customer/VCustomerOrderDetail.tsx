@@ -28,21 +28,21 @@ export class VCustomerOrderDetail extends VPage<CCustomer> {
             <div><span className="small text-muted"></span><strong>{no}</strong></div>
             <div className="small text-muted"><EasyDate date={date} /></div>
             <div className="small cursor-pointer text-primary"
-            // onClick={() => this.share(item)}
+            // onClick={() => this.share(item,this.customer)}
             >
                 <span className="text-primary">分享确认</span>
             </div>
         </div>;
     }
-    private page = observer((param: any) => {
+    oss: any = [
+        { caption: '待确认', state: 'confirmed' },
+        { caption: '待审核', state: 'processing' },
+        { caption: '待发货', state: 'completed' },
+        { caption: '全部', state: 'all' },
+    ];
+    private getTabs = async () => {
         let { getMyOrders } = this.controller.cApp.cOrder;
-        let oss = [
-            { caption: '待确认', state: 'confirmed', icon: '待确认' },
-            { caption: '待审核', state: 'processing', icon: '待审核' },
-            { caption: '待发货', state: 'completed', icon: '待发货' },
-            { caption: '全部', state: 'all', icon: '全部' },
-        ];
-        let tabs = oss.map(v => {
+        this.tabs = this.oss.map(v => {
             let { caption, icon, state } = v;
             return {
                 name: caption,
@@ -57,14 +57,16 @@ export class VCustomerOrderDetail extends VPage<CCustomer> {
                 }
             };
         });
+    }
+    private page = observer((param: any) => {
 
-        let { unit } = param;
-        let { name: customerName, webuser } = this.customer;
+        this.getTabs();
+        let { name: customerName, webuser, unit } = param;
         let left = <span className='px-2 py-1'><FA name='user' className='text-info mr-3' />{customerName}</span>
         let right = <span className='px-2 py-1 mr-3'>{tv(unit, s => s.name)}</span>
         return <Page header='订单详情'>
             <LMR left={left} right={right}></LMR>
-            <Tabs tabs={tabs} tabPosition="top" />
+            <Tabs tabs={this.tabs} tabPosition="top" />
         </Page>
     });
 }

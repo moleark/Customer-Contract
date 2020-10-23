@@ -31,7 +31,6 @@ export class VCart extends VPage<CCart> {
     async open() {
         this.openPage(this.page);
     }
-
     protected CheckOutButton = observer(() => {
         let { checkOut, strikeOut, cApp } = this.controller;
         let { cart } = cApp;

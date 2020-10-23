@@ -6,7 +6,7 @@ import { observer } from 'mobx-react';
 
 export class VProductList extends VPage<CProduct> {
 
-    async open(param: any) {
+    async open() {
 
         this.openPage(this.page);
     }
@@ -25,9 +25,7 @@ export class VProductList extends VPage<CProduct> {
         </>;
     }
     private renderProduct = (product: any, index: number) => {
-        // let { showProductDetail } = this.controller;
         let { brand, description, descriptionC, CAS, purity, molecularFomula, molecularWeight, origin, imageUrl } = product;
-        // let onshowProductDetail = async () => await showProductDetail(product);
         return <div className="d-block mb-4 px-2">
             <div className="py-2">
                 <div><strong>{description}</strong></div>
@@ -55,8 +53,8 @@ export class VProductList extends VPage<CProduct> {
         let { pageProductList } = this.controller;
         pageProductList.more();
     }
-    private page = observer((product: any) => {
-        let { pageProductList, cApp } = this.controller;
+    private page = observer(() => {
+        let { pageProductList } = this.controller;
         let search = <SearchBox className="w-100 mr-2"
             size={"sm"}
             onSearch={(key: string) => this.controller.searchByKey(key)}
@@ -65,7 +63,8 @@ export class VProductList extends VPage<CProduct> {
 
         return <Page header={search} onScrollBottom={this.onScrollBottom}>
             <div className="px-2 py-2 bg-white mb-3">
-                {(pageProductList && pageProductList.items && (pageProductList.items.length > 0)) ? <List before={''} none={none} items={pageProductList} item={{ render: this.renderProduct, onClick: this.onProductClick }} /> : null}
+                {(pageProductList && pageProductList.items && (pageProductList.items.length > 0)) ? <List before={''} none={none}
+                    items={pageProductList} item={{ render: this.renderProduct, onClick: this.onProductClick }} /> : null}
             </div>
         </Page>
     })

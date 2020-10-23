@@ -5,9 +5,8 @@ import { QueryPager } from 'tonva';
 
 export class CCustomerSelect extends CUqBase {
     @observable pageCustomer: QueryPager<any>;
-    private fromCustomerSelect: boolean;
     @observable productGenres: any[] = [];
-    async internalStart(fromCustomerSelect: boolean) {
+    async internalStart() {
         await this.searchByKey('')
         this.openVPage(VCustomerSelect);
     }

@@ -57,10 +57,88 @@ export class VEdit extends VPage<COrder> {
     private orderItemKey = (orderItem: OrderItem) => {
         return orderItem.product.id;
     }
+    private onSubmit = async () => {
+        let { orderData, cApp } = this.controller;
+        let { CustomerInfo } = cApp.cCustomer;
+        let { id: customerid, unit, name, telephone, email, addressString, mobile, invoiceType, invoiceInfo } = CustomerInfo;
+        // 必填项验证
+        // let { shippingContact, invoiceContact, invoiceType, invoiceInfo } = orderData;
+        if (!addressString) {
+            this.shippingAddressIsBlank = true;
+            setTimeout(() => this.shippingAddressIsBlank = false, GLOABLE.TIPDISPLAYTIME);
+            return;
+        }
+        if (!addressString) {
+            if (this.useShippingAddress) {
+                // orderData.invoiceContact = shippingContact; //contactBox;
+                this.invoiceAddressIsBlank = false;
+            } else {
+                this.invoiceAddressIsBlank = true;
+                setTimeout(() => this.invoiceAddressIsBlank = false, GLOABLE.TIPDISPLAYTIME);
+                return;
+            }
+        }
+        if (!invoiceType || !invoiceInfo) {
+            this.invoiceIsBlank = true;
+            setTimeout(() => this.invoiceIsBlank = false, GLOABLE.TIPDISPLAYTIME);
+            return;
+        }
+
+        this.controller.submitOrder();
+    }
+
+    private renderCoupon = observer((param: any) => {
+        let { couponAppliedData, hasAnyCoupon, removeCoupon } = this.controller;
+        if (couponAppliedData) {
+            if (couponAppliedData['id'] === undefined) {
+                let tip = hasAnyCoupon ? "有可用优惠卡/券，点击使用" : "输入优惠券/积分码";
+                return <span className="text-primary">{tip}</span>;
+            } else {
+                let { code, types } = couponAppliedData;
+                let { couponOffsetAmount, couponRemitted, point } = param;
+                let offsetUI, remittedUI, noOffsetUI;
+                let cancelCouponUI = <div
+                    className="position-absolute text-primary border text-center border-primary dropdown-menu-right rounded-circle"
+                    style={{ border: 1, cursor: 'pointer', width: 19, height: 19, lineHeight: 1, top: 5, right: 5 }}
+                    onClick={(e) => { e.stopPropagation(); removeCoupon(); }}
+                >&times;</div>
+                if (types === "credits") {
+                    offsetUI = <div className="d-flex flex-row justify-content-between">
+                        <div className="text-muted">积分:</div>
+                        <div className="text-right text-danger">{point}<small>分</small></div>
+                    </div>
+                }
+                else if (couponOffsetAmount || couponRemitted) {
+                    if (couponOffsetAmount) {
+                        offsetUI = <div className="d-flex flex-row justify-content-between">
+                            <div className="text-muted">折扣:</div>
+                            <div className="text-right text-danger"><small>¥</small>{couponOffsetAmount.toFixed(2)}</div>
+                        </div>
+                    }
+                    if (couponRemitted) {
+                        remittedUI = <div className="d-flex flex-row justify-content-between">
+                            <div className="text-muted">抵扣:</div>
+                            <div className="text-right text-danger"><small>¥</small>{couponRemitted.toFixed(2)}</div>
+                        </div>
+                    }
+                } else {
+                    noOffsetUI = <div>谢谢惠顾</div>;
+                }
+                return <div className="mr-2 position-relative border-primary border px-3 py-1 rounded">
+                    <div className="text-success">{code.substr(0, 4)} {code.substr(4)}</div>
+                    {offsetUI}
+                    {remittedUI}
+                    {noOffsetUI}
+                    {cancelCouponUI}
+                </div>
+            }
+        }
+    });
     private page = observer(() => {
         let { cApp, orderData } = this.controller;
-        let { onShowCustomerSelect, onShowCustomerAddress, goalCustomerInfo, } = cApp.cCustomer;
-        let { name, addressString } = goalCustomerInfo;
+        let { onShowCustomerSelect, onShowCustomerAddress, onInvoiceInfoEdit, onCouponEdit, CustomerInfo, CustomerAddress } = cApp.cCustomer;
+        let { id: customerid, unit, name, telephone, email, addressString, mobile } = CustomerInfo;
+        let { address } = CustomerAddress
         let { showProductSelect } = cApp.cProduct;
 
         let footer = <div className="w-100 px-3 py-1" style={{ backgroundColor: "#f8f8f8" }}>
@@ -68,23 +146,25 @@ export class VEdit extends VPage<COrder> {
                 <div className="text-danger flex-grow-1" style={{ fontSize: '1.8rem' }}><small>¥</small>
                     {(orderData && orderData.amount) ? orderData.amount : null}</div>
                 <button type="button"
-                // className={classNames('btn', 'w-30', { 'btn-danger': currentUser.allowOrdering, 'btn-secondary': !currentUser.allowOrdering })}
-                //     onClick={this.onSubmit} disabled={!currentUser.allowOrdering}
+                    onClick={this.onSubmit}
                 >提交订单
             </button>
             </div>
         </div>;
-
+        let invoiceBlankTip = this.invoiceIsBlank ? <div className="text-danger small my-2"><FA name="exclamation-circle" /> 必须填写发票信息</div> : null;
         let chevronRight = <FA name="chevron-right" className="cursor-pointer" />
-
-        let invoiceContactUI = <div className="row py-3 bg-white mb-1">
+        let shippingAddressBlankTip = this.shippingAddressIsBlank ?
+            <div className="text-danger small my-2"><FA name="exclamation-circle" /> 必须填写收货地址</div>
+            : null;
+        let invoiceAddressBlankTip = this.invoiceAddressIsBlank ?
+            <div className="text-danger small my-2"><FA name="exclamation-circle" /> 必须填写发票地址</div> : null;
+        let invoiceContactUI = <div className="row py-3 bg-white mb-1" onClick={onShowCustomerAddress}>
             <div className="col-4 col-sm-2 pb-2 text-muted">发票地址:</div>
             <div className="col-8 col-sm-10">
-                <div>
-                    <label className="cursor-pointer">
-
-                    </label>
-                </div>
+                <LMR className="w-100 align-items-center" right={chevronRight}>
+                    {tv(unit, s => s.name)} {addressString}
+                </LMR>
+                {shippingAddressBlankTip}
             </div>
         </div>
 
@@ -103,20 +183,28 @@ export class VEdit extends VPage<COrder> {
             }
         }
 
-        freightFeeUI = <>
-            <div className="col-4 col-sm-2 pb-2 text-muted">运费:</div>
-            <div className="col-8 col-sm-10 text-right text-danger"><small>¥</small></div>
-        </>
-
-        let couponUI = <div className="row py-3 bg-white mb-1">
+        let couponUI = <div className="row py-3 bg-white mb-1" onClick={onCouponEdit}>
             <div className="col-4 col-sm-2 pb-2 text-muted">优惠卡券:</div>
             <div className="col-8 col-sm-10">
                 <LMR className="w-100 align-items-center" right={chevronRight}>
-
+                    {React.createElement(this.renderCoupon,
+                        {
+                            couponOffsetAmount: (orderData) ? orderData.couponOffsetAmount : null,
+                            couponRemitted: (orderData) ? orderData.couponRemitted : null,
+                            point: (orderData) ? orderData.point : null
+                        })}
                 </LMR>
             </div>
         </div>;
-
+        let invoiceType: any;
+        if (CustomerInfo) {
+            if (CustomerInfo.invoiceType === 1) {
+                invoiceType = '增值税普通发票 --';
+            } else if (CustomerInfo.invoiceType === 2) {
+                invoiceType = '增值税专用发票 --'
+            }
+        }
+        let invoiceInfo = ((CustomerInfo) && (CustomerInfo.invoiceInfo)) ? CustomerInfo.invoiceInfo.title : null;
         return <Page header={'填写订单'} footer={footer}>
 
             <div className="px-2">
@@ -132,17 +220,18 @@ export class VEdit extends VPage<COrder> {
                     <div className="col-4 col-sm-2 pb-2 text-muted">收货地址:</div>
                     <div className="col-8 col-sm-10">
                         <LMR className="w-100 align-items-center" right={chevronRight}>
-                            {addressString}
+                            {tv(unit, s => s.name)} {mobile} {addressString}
                         </LMR>
-                        {/* {shippingAddressBlankTip} */}
+                        {shippingAddressBlankTip}
                     </div>
                 </div>
                 {invoiceContactUI}
-                <div className="row py-3 bg-white mb-1" >
+                <div className="row py-3 bg-white mb-1" onClick={onInvoiceInfoEdit}>
                     <div className="col-4 col-sm-2 pb-2 text-muted">发票信息:</div>
                     <div className="col-8 col-sm-10">
                         <LMR className="w-100 align-items-center" right={chevronRight}>
-
+                            {invoiceType} {invoiceInfo}
+                            {invoiceBlankTip}
                         </LMR>
                     </div>
                 </div>
