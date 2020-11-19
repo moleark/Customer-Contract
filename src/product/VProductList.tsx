@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { CProduct } from './CProduct';
-import { VPage, Page, SearchBox, Scroller, tv, List } from 'tonva';
+import { VPage, Page, SearchBox, Scroller, tv, List, Form } from 'tonva';
 import { ProductImage } from 'tools/productImage';
 import { observer } from 'mobx-react';
 
@@ -24,8 +24,11 @@ export class VProductList extends VPage<CProduct> {
             <div className="col-8 col-sm-4 col-lg-8">{value}</div>
         </>;
     }
+    // private renderProduct = (p: any) => {
+    //     this.renderVm(VSdetail, p);
+    // }
     private renderProduct = (product: any, index: number) => {
-        let { brand, description, descriptionC, CAS, purity, molecularFomula, molecularWeight, origin, imageUrl } = product;
+        let { id, brand, description, descriptionC, CAS, purity, molecularFomula, molecularWeight, origin, imageUrl } = product;
         return <div className="d-block mb-4 px-2">
             <div className="py-2">
                 <div><strong>{description}</strong></div>
@@ -46,6 +49,9 @@ export class VProductList extends VPage<CProduct> {
                     </div>
                 </div>
             </div>
+            <div>
+                {/* <Form schema={schema} uiSchema={this.uiSchema} formData={id} /> */}
+            </div>
         </div>
     }
     private onScrollBottom = async (scroller: Scroller) => {
@@ -54,13 +60,12 @@ export class VProductList extends VPage<CProduct> {
         pageProductList.more();
     }
     private page = observer(() => {
-        let { pageProductList } = this.controller;
+        let { pageProductList, cApp } = this.controller;
         let search = <SearchBox className="w-100 mr-2"
             size={"sm"}
             onSearch={(key: string) => this.controller.searchByKey(key)}
             placeholder="搜索品名、编号、CAS、MDL等" />
         let none = <div className="my-3 mx-2 text-warning">无</div>;
-
         return <Page header={search} onScrollBottom={this.onScrollBottom}>
             <div className="px-2 py-2 bg-white mb-3">
                 {(pageProductList && pageProductList.items && (pageProductList.items.length > 0)) ? <List before={''} none={none}

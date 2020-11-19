@@ -42,6 +42,7 @@ export class VCoupleAvailable extends VPage<CCoupon> {
 
             let validationResult = await getCouponValidationResult(coupon);
             let { result } = validationResult;
+            // result===6 可以领取自己的优惠券
             if (result === 1 || result === 6) {
                 await drawCoupon(validationResult);
                 this.tips = '领取成功！';
@@ -88,7 +89,7 @@ export class VCoupleAvailable extends VPage<CCoupon> {
         if (this.vipCardForWebUser) {
             let { coupon } = this.vipCardForWebUser;
             vipCardUI = <div onClick={() => this.applySelectedCoupon(coupon.code)}>
-                {/* {this.renderVm(VVIPCard, coupon)} */}
+                {this.renderVm(VVIPCard, coupon)}
             </div>
         }
 

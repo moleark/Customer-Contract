@@ -1,16 +1,18 @@
 import * as React from "react";
 import { observable } from "mobx";
 import { observer } from "mobx-react";
-import { Context, QueryPager } from "tonva";
+import { Context, QueryPager, BoxId } from "tonva";
 import { CUqBase } from "../CBase";
 import { VCustomer } from "./VCustomer";
 import { VCustomerSearchByUnit } from "./VCustomerSearchByUnit";
 import { VCreateCustomer } from "./VCreateCustomer";
 import { VCreateCustomerFinish } from "./VCreateCustomerFinish";
 import { VCustomerOrderDetail } from "./VCustomerOrderDetail";
-import { CCustomerSelect } from './CCustomerSelect';
-import { CCustomerAddress } from './CCustomerAddress';
-import { CInvoiceInfo } from './CInvoiceInfo';
+import { CCustomerAddress, CCustomerSelect, CInvoiceInfo } from './CCustomerInfo';
+import { groupByProduct } from '../tools/groupByProduct';
+import { VOrderDetail } from './VOrderDetail';
+import { VEdit } from "order/VEdit";
+
 
 /* eslint-disable */
 
@@ -20,12 +22,11 @@ export class CCustomer extends CUqBase {
     @observable pageCustomer: QueryPager<any>;
     @observable pageCustomerSearch: QueryPager<any>;
     @observable pageCustomerSearchByUnit: QueryPager<any>;
+    @observable customerorders: any;/**客户订单 */
 
     @observable newMyCustomerList: any[];
     //初始化
     protected async internalStart() {
-        await this.searchByKey('')
-
     }
 
     render = observer(() => {
@@ -33,7 +34,7 @@ export class CCustomer extends CUqBase {
     });
 
     tab = () => {
-        this.searchByKey("");
+        this.searchByKey('');
         return <this.render />;
     };
 
@@ -45,11 +46,16 @@ export class CCustomer extends CUqBase {
         let selectmycustomer = await cCustomerSelect.call<any>(true);
         this.CustomerInfo = selectmycustomer;
     }
+    onCustomerSelect = async (customer: any) => {
+        this.CustomerInfo = customer;
+        this.closePage(4)
+        this.openVPage(VEdit);
+    }
     /**客户地址 */
     onShowCustomerAddress = async () => {
         let cCustomerAddress = this.newC(CCustomerAddress);
         let customeraddress = await cCustomerAddress.call<any>(this.CustomerInfo);
-        this.CustomerAddress = customeraddress;
+        // this.CustomerAddress = customeraddress;
     }
     /**
       * 打开发票信息编辑界面
@@ -82,26 +88,32 @@ export class CCustomer extends CUqBase {
         this.pageCustomer.first({ key: key });
     };
 
-    // 查询客户--通过ID
+    //获取客户历史订单
+    getCustomerOrder = async (customer: any) => {
+        let { id } = customer;
+        this.customerorders = await this.uqs.salesTask.SearchCustomerOrder.table(
+            {
+                _mycustomer: id,
+                _ordertype: "coupon"
+            }
+        );
+    };
+
+
+    // 查询客户的订单详情
     showCustomerOrderDetail = async (myCustomer: any) => {
         let { uqs, user } = this;
         let { salesTask } = uqs;
-        let { MyCustomer, SearchMyCustomerDepartment, SearchMyCustomerResearch, SearchMyCustomerOfficePost, CustomerMyCustomerMap, Coupon } = salesTask;
+        let { MyCustomer } = salesTask;
         let { id } = myCustomer;
         let mycustomer = await MyCustomer.load(id);
         // let department = await SearchMyCustomerDepartment.query({ mycustomer: id });
         // let research = await SearchMyCustomerResearch.query({ mycustomer: id });
-        // let officePost = await SearchMyCustomerOfficePost.query({ mycustomer: id });
         // if (department.ret.length > 0)
         //     mycustomer.department = department.ret[0];
         // if (research.ret.length > 0) mycustomer.research = research.ret[0];
-        // if (officePost.ret.length > 0)
-        //     mycustomer.officePost = officePost.ret[0];
 
-        // await this.getActiveTasks(myCustomer);
-        // await this.getCustomerOrder(myCustomer);
-        // await this.getCustomerContent(mycustomer.research ? mycustomer.research.id : 0);
-
+        await this.getCustomerOrder(myCustomer);
 
         // let customermap = await CustomerMyCustomerMap.obj({ sales: user, mycustomer: myCustomer });
         // if (customermap) {
@@ -138,8 +150,9 @@ export class CCustomer extends CUqBase {
     };
 
     showCustomerSearchByUnit = async (param: any) => {
-        await this.searchCustomerSearchByUnit(param.id.id, "");
-        this.openVPage(VCustomerSearchByUnit);
+        let { model } = param
+        await this.searchCustomerSearchByUnit(model.id.id, "");
+        this.openVPage(VCustomerSearchByUnit, param);
     }
     /**
         * 查询我的新客户
@@ -174,4 +187,22 @@ export class CCustomer extends CUqBase {
         let { code } = ret;
         this.openVPage(VCreateCustomerFinish, code);
     };
+    openOrderDetail = async (orderId: number) => {
+
+        let order = await this.uqs.order.Order.getSheet(orderId);
+        let { data } = order;
+        let { orderItems } = data;
+        let orderItemsGrouped = groupByProduct(orderItems);
+        data.orderItems = orderItemsGrouped;
+        this.openVPage(VOrderDetail, order);
+    }
+    renderDeliveryTime = (pack: BoxId) => {
+        let { cProduct } = this.cApp;
+        return cProduct.renderDeliveryTime(pack);
+    }
+
+    renderOrderItemProduct = (product: BoxId) => {
+        let { cProduct } = this.cApp;
+        return cProduct.renderCartProduct(product);
+    }
 }

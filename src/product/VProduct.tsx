@@ -2,7 +2,7 @@ import * as React from 'react';
 import { CProduct } from './CProduct';
 import {
     VPage, Page, Form, ItemSchema, NumSchema, UiSchema, Field,
-    ObjectSchema, RowContext, UiCustom, FormField, BoxId
+    ObjectSchema, RowContext, UiCustom, FormField, BoxId, SearchBox
 } from 'tonva';
 import { tv } from 'tonva';
 import { MinusPlusWidget } from '../tools/minusPlusWidget';
@@ -36,7 +36,7 @@ export class VProduct extends VPage<CProduct> {
 
     private renderProduct = (product: MainProductChemical) => {
 
-        let { id, brand, description, descriptionC, CAS, purity, molecularFomula, molecularWeight, origin, imageUrl } = product;
+        let { brand, description, descriptionC, CAS, purity, molecularFomula, molecularWeight, origin, imageUrl } = product;
         return <div className="mb-3 px-2">
             <div className="py-2"><strong>{description}</strong></div>
             <div>{descriptionC}</div>
@@ -100,10 +100,11 @@ export class VProduct extends VPage<CProduct> {
         let price = this.minPrice(vipPrice, promotionPrice) || retail;
         let { cApp } = this.controller;
         let { cart } = cApp;
-        if (value > 0)
+        if (value > 0) {
             await cart.add(this.productBox, pack, value, price, retail, currency);
-        else
+        } else {
             await cart.removeFromCart([{ productId: this.productBox.id, packId: pack.id }]);
+        }
     }
 
     private minPrice(vipPrice: any, promotionPrice: any) {
@@ -118,7 +119,7 @@ export class VProduct extends VPage<CProduct> {
                 widget: 'custom',
                 className: 'text-center',
                 WidgetClass: MinusPlusWidget as any,
-                onChanged: this.onQuantityChanged
+                onChanged: this.onQuantityChanged,
             } as UiCustom
         },
     };
@@ -130,16 +131,20 @@ export class VProduct extends VPage<CProduct> {
         </>;
     }
 
-    private page = observer((product: any) => {
+    private page = observer((productData: any) => {
 
         let { cApp } = this.controller;
-        let header = '详情';
-        let cartLabel = cApp.cCart.renderCartLabel();
+        let { checkOut } = cApp.cCart
+        let header = <SearchBox className="w-100 mr-2"
+            size={"sm"}
+            onSearch={(key: string) => this.controller.searchByKey(key)}
+            placeholder="搜索品名、编号、CAS、MDL等" />;
+        let footer = <div className='text-center small py-2 bg-primary text-white' onClick={checkOut}>确认 </div>
         if (true) {
             let viewProduct = new ViewMainSubs<MainProductChemical, ProductPackRow>(this.renderProduct, this.renderPack);
-            viewProduct.model = product;
+            viewProduct.model = productData;
 
-            return <Page header={header} right={cartLabel}>
+            return <Page header={header} footer={footer}>
                 <div className="px-2 py-2 bg-white mb-3">{viewProduct.render()}</div>
             </Page>
         }

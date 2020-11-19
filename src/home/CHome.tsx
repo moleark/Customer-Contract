@@ -20,12 +20,17 @@ export class CHome extends CUqBase {
         return <this.render />;
     };
 
-    onAdd = () => {
-        // this.current = { caption: "", discription: "", content: "", image: undefined, template: undefined };
+    edit = () => {
         this.openVPage(VEdit);
     };
 
-    selectCustomer = async (valuename: any, startdate: Date, enddate: Date) => {
+    /**
+     *根据时间，客户搜索其订单，并根据不同状态返回数据
+     * @param valuename 
+     * @param datetime 
+     */
+    selectCustomer = async (valuename: any, datetime: Date) => {
         return
     };
+
 }

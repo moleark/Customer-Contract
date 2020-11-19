@@ -108,12 +108,14 @@ export class Cart {
         }
     }
 
-    getQuantity(productId: number, packId: number): number {
-        let cp = this.cartItems.find(v => v.$isDeleted !== true && Tuid.equ(v.product, productId));
-        if (!cp) return 0;
-        let cpp = cp.packs.find(v => v.pack.id === packId);
-        return cpp === undefined ? 0 : cpp.quantity;
-    }
+
+
+    // getQuantity(productId: number, packId: number): number {
+    //     let cp = this.cartItems.find(v => v.$isDeleted !== true && Tuid.equ(v.product, productId));
+    //     if (!cp) return 0;
+    //     let cpp = cp.packs.find(v => v.pack.id === packId);
+    //     return cpp === undefined ? 0 : cpp.quantity;
+    // }
 
     isDeleted(productId: number): boolean {
         let i = this.cartItems.findIndex(v => v.$isDeleted === true && Tuid.equ(v.product, productId));

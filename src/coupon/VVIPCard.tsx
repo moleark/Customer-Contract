@@ -32,10 +32,10 @@ export class VCoupon extends View<CCoupon> {
         return null;
     }
 
-    // private showDiscountSetting = (vipCardId: VIPCard, event: React.MouseEvent) => {
-    //     event.stopPropagation();
-    //     this.controller.showDiscountSetting(vipCardId);
-    // }
+    private showDiscountSetting = (vipCardId: VIPCard, event: React.MouseEvent) => {
+        event.stopPropagation();
+        this.controller.showDiscountSetting(vipCardId);
+    }
 
     protected renderCardDescription = (): JSX.Element => {
         let { discount } = this.coupon;
@@ -105,12 +105,12 @@ export class VCoupon extends View<CCoupon> {
         } else {
 
             let tipUI = null;
-            // if (types !== 'credits') {
-            //     if (discount)
-            //         tipUI = <small className="text-success">此{COUPONBASE[types]['name']}全场通用</small>
-            //     else
-            //         tipUI = <small className="text-success">查看适用品牌及折扣</small>
-            // }
+            if (types !== 'credits') {
+                if (discount)
+                    tipUI = <small className="text-success">此{COUPONBASE[types]['name']}全场通用</small>
+                else
+                    tipUI = <small className="text-success" onClick={(event) => this.showDiscountSetting(this.coupon, event)}>查看适用品牌及折扣</small>
+            }
             let newDate = getEasyDate(validitydate);
 
             let content = <div className="float-right pr-2">
@@ -118,9 +118,9 @@ export class VCoupon extends View<CCoupon> {
                     <FA name='th-large' className='mr-1 text-warning' />{this.getCodeShow(code)}
                     <small className="ml-3">有效期：{newDate}</small>
                 </div>
-                {/* <div className="float-right">
+                <div className="float-right">
                     {tipUI}
-                </div> */}
+                </div>
             </div>;
 
             let left = <div>

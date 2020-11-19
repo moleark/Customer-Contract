@@ -1,8 +1,8 @@
 import { CUqBase } from '../CBase';
-import { BoxId, nav, User, QueryPager, Tuid } from 'tonva';
 import { observable } from 'mobx';
 import { VCoupleAvailable } from './VCouponAvailable';
 import { VCoupon, VCredits, VVIPCard } from './VVIPCard';
+import { VVIPCardDiscount } from './VVIPCardDiscount';
 
 export const COUPONBASE: any = {
     'coupon': { 'name': '优惠券', 'view': VCoupon },
@@ -149,14 +149,22 @@ export class CCoupon extends CUqBase {
         }
         return validCreditsForWebUser;
     }
-
+    /**
+       * 显示VIP卡的品牌折扣明细 
+       * @param coupon 
+       */
+    showDiscountSetting = async (vipCard: any) => {
+        let { types, id } = vipCard;
+        vipCard.discountSetting = await this.getCouponDiscountSetting(types, id);
+        this.openVPage(VVIPCardDiscount, vipCard);
+    }
 
     /**
      * 获取卡券的有效折扣  
      */
-    // getValidDiscounts = async (types: string, id: number) => {
-    //     return await this.getCouponDiscountSetting(types, id);
-    // }
+    getValidDiscounts = async (types: string, id: number) => {
+        return await this.getCouponDiscountSetting(types, id);
+    }
 
     private getCouponDiscountSetting = async (types: string, couponId: number) => {
         if (types === 'vipcard' || types === 'coupon') {

@@ -1,13 +1,12 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
 import { VPage, Page, Form, ObjectSchema, NumSchema, ArrSchema, UiSchema, UiArr, FormField, UiCustom } from 'tonva';
-import { FA } from 'tonva';
 import { tv } from 'tonva';
 import { MinusPlusWidget } from '../tools/minusPlusWidget';
 import { CCart } from './CCart';
 import { CartPackRow, CartItem2 } from './Cart';
 
-const cartSchema = [
+const schema = [
     {
         name: 'list',
         type: 'arr',
@@ -61,10 +60,10 @@ export class VCart extends VPage<CCart> {
     private renderCartItem = (item: CartItem2) => {
         let { product } = item;
         let { controller } = this;
-        let { onProductClick, renderCartProduct } = controller;
+        let { renderCartProduct } = controller;
         return <div className="pr-1">
             <div className="row">
-                <div className="col-lg-6 pb-3" onClick={() => onProductClick(product)}>
+                <div className="col-lg-6 pb-3">
                     {renderCartProduct(product)}
                 </div>
                 <div className="col-lg-6"><FormField name="packs" /></div>
@@ -73,7 +72,7 @@ export class VCart extends VPage<CCart> {
     }
 
     private packsRow = (item: CartPackRow) => {
-        let { pack, price, currency } = item;
+        let { pack, price } = item;
 
         return <div className="px-2">
             <div className="d-flex align-items-center">
@@ -121,26 +120,22 @@ export class VCart extends VPage<CCart> {
     protected cartForm = observer(() => {
         let { cart } = this.controller.cApp;
         let { data: cartData } = cart;
-        return <Form className="bg-white flex-fill overflow-auto" schema={cartSchema} uiSchema={this.uiSchema} formData={cartData} />
+        return <Form className="bg-white flex-fill overflow-auto" schema={schema} uiSchema={this.uiSchema} formData={cartData} />
     });
-
-    private empty() {
-        return <div className="py-5 text-center bg-white">你的购物车空空如也</div>
-    }
 
     private page = observer((params: any): JSX.Element => {
         let { cart } = this.controller.cApp;
         let footer: any, content: any;
-        if (cart.count.get() === 0 && cart.cartItems.length === 0) {
-            content = this.empty();
-            footer = undefined;
-        }
-        else {
-            content = React.createElement(this.cartForm);
-            footer = React.createElement(this.CheckOutButton);
-        }
-        return <Page header="购物车" footer={footer}>
-            {content}
+        // if (cart.count.get() === 0 && cart.cartItems.length === 0) {
+        //     content = <div className="py-5 text-center bg-white">你的购物列表空空如也</div>;
+        //     footer = undefined;
+        // }
+        // else {
+        //     content = React.createElement(this.cartForm);
+        //     footer = React.createElement(this.CheckOutButton);
+        // }
+        return <Page header="购物列表" footer={footer}>
+            {/* {content} */}
         </Page>;
     })
 }

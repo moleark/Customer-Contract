@@ -1,14 +1,20 @@
 import { BoxId } from 'tonva';
 import { observable, computed } from 'mobx';
 import { CartPackRow } from 'cart/Cart';
+import { CCustomer } from 'customer/CCustomer';
 
 export class Order {
-
     @observable orderItems: OrderItem[] = [];
-
+    customer: any;
+    webUser: any;
     @observable freightFee: number;
     @observable freightFeeRemitted: number;
+    organization: BoxId;
 
+    @observable shippingContact: BoxId;
+    @observable invoiceContact: BoxId;
+    @observable invoiceType: BoxId;
+    @observable invoiceInfo: BoxId;
     /**
      * 总金额
      */
@@ -30,7 +36,6 @@ export class Order {
     @observable point: number;
     comments: string;
     salesRegion: BoxId;
-
     getDataForSave() {
         let orderItems: any[] = [];
         this.orderItems.forEach(oi => {
@@ -43,6 +48,13 @@ export class Order {
             })
         });
         return {
+            webUser: this.webUser,
+            organization: this.organization,
+            customer: this.customer,
+            shippingContact: this.shippingContact,
+            invoiceContact: this.invoiceContact,
+            invoiceType: this.invoiceType,
+            invoiceInfo: this.invoiceInfo,
             amount: this.amount,
             currency: this.currency,
             freightFee: this.freightFee,

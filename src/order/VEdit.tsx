@@ -1,29 +1,25 @@
 import * as React from 'react';
-import { Page, VPage, tv, LMR, List, FA } from 'tonva';
+import { Page, VPage, tv, LMR, List, FA, BoxId } from 'tonva';
 import { COrder } from '../order/COrder';
 import { observer } from 'mobx-react';
 import { observable } from 'mobx';
-// import { OrderItem } from './Order';
-// import { CartPackRow } from '../cart/Cart';
 import classNames from 'classnames';
 import { GLOABLE } from '../configuration';
 import { OrderItem } from './Order';
 import { CartPackRow } from 'cart/Cart';
-
 export class VEdit extends VPage<COrder> {
     @observable private useShippingAddress: boolean = true;
     @observable private shippingAddressIsBlank: boolean = false;
     @observable private invoiceAddressIsBlank: boolean = false;
     @observable private invoiceIsBlank: boolean = false;
+    private productBox: BoxId;
     async open() {
         this.openPage(this.page);
     }
-    private nullContact = () => {
-        return <span className="text-primary">选择收货地址</span>;
-    }
-    private packsRow = (item: CartPackRow, index: number) => {
-        let { pack, quantity, retail, price, priceInit } = item;
 
+    private packsRow = (item: CartPackRow, index: number) => {
+        let { plusQuantity, minusQuantity } = this.controller;
+        let { pack, quantity, retail, price, priceInit } = item;
         let retailUI: any;
         if (price !== retail) {
             retailUI = <del>¥{retail * quantity}</del>;
@@ -35,9 +31,15 @@ export class VEdit extends VPage<COrder> {
                     <small className="text-muted">{retailUI}</small>&nbsp; &nbsp;
                     <span className="text-danger h5"><small>¥</small>{parseFloat((price * quantity).toFixed(2))}</span>
                     <small className="text-muted">(¥{parseFloat(price.toFixed(2))} × {quantity})</small>
+                    <div className='pt-3'>
+                        <input type='button' value='-' onClick={() => minusQuantity(pack)} />
+                        <input type="number" value={quantity} style={{ width: '25%' }} />
+                        <input type='button' value='+' onClick={() => plusQuantity(pack)} />
+                    </div>
                 </div>
+
             </div>
-            <div>{this.controller.renderDeliveryTime(pack)}</div>
+            <div className='d-flex p-2'>{this.controller.renderDeliveryTime(pack)}</div>
         </div>;
     }
     private renderOrderItem = (orderItem: OrderItem) => {
@@ -50,7 +52,8 @@ export class VEdit extends VPage<COrder> {
                     packs.map((p, index) => {
                         return packsRow(p, index);
                     })
-                }</div>
+                }
+                </div>
             </div>
         </div>;
     }
@@ -60,7 +63,7 @@ export class VEdit extends VPage<COrder> {
     private onSubmit = async () => {
         let { orderData, cApp } = this.controller;
         let { CustomerInfo } = cApp.cCustomer;
-        let { id: customerid, unit, name, telephone, email, addressString, mobile, invoiceType, invoiceInfo } = CustomerInfo;
+        let { id: customerid, unit, name, telephone, addressString, invoiceType, invoiceInfo } = CustomerInfo;
         // 必填项验证
         // let { shippingContact, invoiceContact, invoiceType, invoiceInfo } = orderData;
         if (!addressString) {
@@ -134,13 +137,15 @@ export class VEdit extends VPage<COrder> {
             }
         }
     });
+    // private productvalue = () => { }
+    private onChangeval = (evt: React.ChangeEvent<HTMLInputElement>) => {
+
+    }
     private page = observer(() => {
         let { cApp, orderData } = this.controller;
-        let { onShowCustomerSelect, onShowCustomerAddress, onInvoiceInfoEdit, onCouponEdit, CustomerInfo, CustomerAddress } = cApp.cCustomer;
-        let { id: customerid, unit, name, telephone, email, addressString, mobile } = CustomerInfo;
-        let { address } = CustomerAddress
+        let { onShowCustomerSelect, onShowCustomerAddress, onInvoiceInfoEdit, onCouponEdit, CustomerInfo } = cApp.cCustomer;
+        let { unit, name, addressString, mobile } = CustomerInfo;
         let { showProductSelect } = cApp.cProduct;
-
         let footer = <div className="w-100 px-3 py-1" style={{ backgroundColor: "#f8f8f8" }}>
             <div className="d-flex justify-content-left">
                 <div className="text-danger flex-grow-1" style={{ fontSize: '1.8rem' }}><small>¥</small>
@@ -156,8 +161,6 @@ export class VEdit extends VPage<COrder> {
         let shippingAddressBlankTip = this.shippingAddressIsBlank ?
             <div className="text-danger small my-2"><FA name="exclamation-circle" /> 必须填写收货地址</div>
             : null;
-        let invoiceAddressBlankTip = this.invoiceAddressIsBlank ?
-            <div className="text-danger small my-2"><FA name="exclamation-circle" /> 必须填写发票地址</div> : null;
         let invoiceContactUI = <div className="row py-3 bg-white mb-1" onClick={onShowCustomerAddress}>
             <div className="col-4 col-sm-2 pb-2 text-muted">发票地址:</div>
             <div className="col-8 col-sm-10">
@@ -196,15 +199,6 @@ export class VEdit extends VPage<COrder> {
                 </LMR>
             </div>
         </div>;
-        let invoiceType: any;
-        if (CustomerInfo) {
-            if (CustomerInfo.invoiceType === 1) {
-                invoiceType = '增值税普通发票 --';
-            } else if (CustomerInfo.invoiceType === 2) {
-                invoiceType = '增值税专用发票 --'
-            }
-        }
-        let invoiceInfo = ((CustomerInfo) && (CustomerInfo.invoiceInfo)) ? CustomerInfo.invoiceInfo.title : null;
         return <Page header={'填写订单'} footer={footer}>
 
             <div className="px-2">
@@ -230,7 +224,8 @@ export class VEdit extends VPage<COrder> {
                     <div className="col-4 col-sm-2 pb-2 text-muted">发票信息:</div>
                     <div className="col-8 col-sm-10">
                         <LMR className="w-100 align-items-center" right={chevronRight}>
-                            {invoiceType} {invoiceInfo}
+                            {tv(CustomerInfo.invoiceType, (v) => <>{v.description}</>, undefined, () => <span className="text-primary">填写发票信息</span>)}
+                            {tv(CustomerInfo.invoiceInfo, (v) => <> -- {v.title}</>, undefined, () => <></>)}
                             {invoiceBlankTip}
                         </LMR>
                     </div>

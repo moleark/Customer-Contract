@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import { VPage, Page } from 'tonva';
+import { VPage, Page, tv } from 'tonva';
 import { LMR, List, SearchBox, FA } from 'tonva';
 import { CCustomerUnit } from './CCustomerUnit';
+import { observable } from 'mobx';
 // import { setting } from 'appConfig';
 
 
@@ -13,15 +14,17 @@ export class VCustomerUnitSelect extends VPage<CCustomerUnit> {
     2.关联单位用的，选择后返回单位对象
     3.按照客户搜素单位用的； 点击后进入客户搜素页面
     **/
-    private type: any;
-
+    @observable private type: any;
+    @observable private selectCus: any;
     async open(param: any) {
-        this.type = param;
+        this.type = param.type;
+        this.selectCus = param.selectCus
         this.openPage(this.page);
     }
 
     private renderItem(salesTask: any, index: number) {
         let { name } = salesTask;
+
         return <LMR className="px-3 py-1" left={<FA name='university' className='my-2 mr-3 text-info' />}>
             <div className="font-weight-bold my-1">{name}</div>
         </LMR >
@@ -29,12 +32,14 @@ export class VCustomerUnitSelect extends VPage<CCustomerUnit> {
 
     private onClickRow = async (model: any) => {
         let { showCreateCustomer, returnCustomerUnit, cApp } = this.controller;
+        let selectCus = this.selectCus;
+        let modelS = { model, selectCus }
         if (this.type === 1) {
             await showCreateCustomer(model.id);
         } else if (this.type === 2) {
             await returnCustomerUnit(model);
         } else if (this.type === 3) {
-            await cApp.cCustomer.showCustomerSearchByUnit(model);
+            await cApp.cCustomer.showCustomerSearchByUnit(modelS);
         }
     }
 

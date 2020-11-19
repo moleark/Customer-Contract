@@ -6,6 +6,7 @@ import { VProductDelivery } from './VProductDelivery';
 import { VCartProuductView } from './VProductView';
 import { VProductList } from './VProductList';
 import { LoaderProductChemicalWithPrices } from './itemLoader';
+import { VChemicalInfoInCart } from './VChemicalInfoInCart';
 
 export class CProduct extends CUqBase {
     @observable pageProductList: QueryPager<any>;
@@ -41,16 +42,24 @@ export class CProduct extends CUqBase {
     }
 
     renderChemicalInfoInCart = (product: BoxId) => {
-        // return this.renderView(VChemicalInfoInCart, product);
+        return this.renderView(VChemicalInfoInCart, product);
+    }
+    getChemicalInfo = async (productId: number) => {
+        if (this.chemicalInfoContainer[productId] === undefined) {
+            this.chemicalInfoContainer[productId] = await this.uqs.product.ProductChemical.obj({ product: productId });
+        }
     }
 
     showProductSelect = async () => {
+        this.closePage()
         this.openVPage(VProductList);
     }
     searchByKey = async (key: string) => {
         let { currentSalesRegion } = this.cApp;
         this.pageProductList = new QueryPager(this.uqs.product.SearchProduct, 10, 10);
         this.pageProductList.first({ keyWord: key, salesRegion: currentSalesRegion.id });
+        this.closePage()
+        await this.showProductSelect()
     };
 
     showProductDetail = async (productId: BoxId | any) => {
@@ -61,4 +70,10 @@ export class CProduct extends CUqBase {
             this.openVPage(VProduct, { productData, product, discount });
         }
     }
-}
+
+    /**
+     * 
+     * product 与 price
+     */
+
+} 

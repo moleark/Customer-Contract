@@ -3,7 +3,7 @@ import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import { VPage, Page, UiSchema, UiInputItem, Form, Context, tv, BoxId, FA } from 'tonva';
 import { Schema } from 'tonva';
-import { CInvoiceInfo } from './CInvoiceInfo';
+import { CInvoiceInfo } from './CCustomerInfo';
 
 const schema: Schema = [
     { name: 'id', type: 'id', required: false },
@@ -164,7 +164,7 @@ export class VInvoiceInfo extends VPage<CInvoiceInfo> {
         return <Form ref={v => this.form = v} className="my-3"
             schema={schema}
             uiSchema={uiSchema}
-            formData={''}
+            formData={''}//写入传入客户的发票信息
             onButtonClick={this.onFormButtonClick}
             fieldLabelSize={3} />
     }
